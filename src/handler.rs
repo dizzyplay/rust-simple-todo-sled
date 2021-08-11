@@ -20,7 +20,8 @@ impl JsonResponse {
 }
 
 pub async fn todo_list(todo_list: DB) -> WebResult<impl Reply> {
-    let todos = todo_list.read().await.list();
+    let mut todos = todo_list.read().await.list();
+    todos.sort();
     let todos = todos
         .iter()
         .map(|v| {

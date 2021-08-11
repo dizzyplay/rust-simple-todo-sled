@@ -1,15 +1,36 @@
 use serde::{Deserialize, Serialize};
 use serde_json;
 use sled::{self, Db, Result};
+use std::cmp::Ordering;
 use std::convert::Infallible;
 use std::str;
 use warp::{self, Filter};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Eq)]
 pub struct Todo {
     pub id: String,
     pub title: String,
     pub is_done: bool,
+}
+
+impl PartialEq for Todo {
+    fn eq(&self, other: &Self) -> bool {
+        self.id.parse::<usize>().unwrap() == other.id.parse::<usize>().unwrap()
+    }
+}
+
+impl PartialOrd for Todo {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for Todo {
+    fn cmp(&self, other: &Self) -> Ordering {
+        let a = self.id.parse::<usize>().unwrap();
+        let b = other.id.parse::<usize>().unwrap();
+        a.cmp(&b)
+    }
 }
 
 pub struct TodoList {
